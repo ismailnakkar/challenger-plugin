@@ -64,103 +64,68 @@ Agents: [list of active agents]
 
 ## Step 3: Run Challenge Rounds
 
+Run all rounds internally without showing per-round output. Do NOT print each agent's turn or between-round summaries. Work through all rounds silently, refining the resolution as you go.
+
 For each round, cycle through the active agents in order: **skeptic → sentinel → architect → pragmatist** (skip any not selected).
 
-### Per-Agent Turn
+### Per-Agent Turn (internal, not shown to user)
 
 For each agent's turn, adopt that agent's personality and lens (as defined in their agent .md file). Then:
 
-1. **State** the current resolution (one paragraph — use the refined resolution from the previous agent's turn, or the original resolution if this is the first turn)
+1. **State** the current resolution
 2. **Challenge** it with one focused objection through your agent's specific lens
-3. **Gather evidence** — use Read, Grep, Glob, or Bash to verify or support your challenge. Cite what you find.
+3. **Gather evidence** — use Read, Grep, Glob, or Bash to verify or support your challenge
 4. **Assess impact** — what happens if this challenge is ignored?
-5. **Refine** — update the resolution to address valid challenges, or explain why the challenge is dismissed
+5. **Refine** — update the resolution to address valid challenges, or dismiss with reason
 6. **Score** confidence 1-10 from this agent's perspective
 
-### Output Format Per Agent Turn
+Track all challenges, evidence, refinements, and scores internally for the final output.
 
-```
-## Round [N] — [Agent Name] challenges: [topic]
+Use these severity levels internally:
+- Critical — this could make the resolution completely wrong or cause serious harm
+- Significant — this weakens the resolution or creates risk
+- Minor — a gap worth noting but not blocking
 
-**Current Resolution:**
-[one clear paragraph]
+### Tensions (tracked internally)
 
-**Challenge:**
-[icon] [challenge type]: [description]
+If two agents' challenges contradict each other (e.g., architect wants more abstraction, pragmatist wants less), record this as a tension to surface in the final output.
 
-**Evidence:**
-[code snippet, git history, test result, or logical proof. If no evidence found, state that explicitly.]
-
-**Impact:** [what happens if this challenge is ignored]
-
-**Refined Resolution:**
-[updated paragraph, or original + rebuttal if challenge dismissed]
-
-**Confidence:** [N]/10 — [reason]
-```
-
-Use these severity icons:
-- 🔴 Critical — this could make the resolution completely wrong or cause serious harm
-- 🟡 Significant — this weakens the resolution or creates risk
-- 🔵 Minor — a gap worth noting but not blocking
-
-### Between Rounds
-
-After all active agents have taken their turn in a round, compute the composite confidence and present it:
-
-```
-**Round [N] Complete**
-Composite Confidence: [N]/10
-Agent Scores: [list only active agents and their scores]
-[note any tensions between agents]
-
-> Accept this resolution, or shall I keep challenging?
-```
-
-Only show scores for agents that participated in this round. If only skeptic and sentinel are active, do not list architect or pragmatist.
-
-### Tensions
-
-If two agents' challenges contradict each other (e.g., architect wants more abstraction, pragmatist wants less), surface this explicitly:
-
-```
-**⚡ Tension:** [Agent A] recommends [X] but [Agent B] recommends [Y].
-This requires your judgment — [brief framing of the trade-off].
-```
-
-## Step 4: Stopping Conditions
+### Stopping Conditions
 
 Stop the challenge loop when ANY of these are met:
 
 1. **Confidence threshold:** Composite score >= 8 AND no individual agent scores below 6
-2. **User accepts:** User responds with "accept", "looks good", "ship it", or similar affirmation
-3. **User stops:** User responds with "stop", "stop challenging", "enough", or similar
-4. **Max rounds reached:** Based on intensity level (quick: 2, deep: 5, brutal: no hard max — but suggest stopping after 8 rounds)
+2. **Max rounds reached:** Based on intensity level (quick: 2, deep: 5, brutal: no hard max — but stop after 8 rounds)
 
-If stopping due to max rounds with low confidence, note the remaining concerns explicitly.
+If the user asks to see round details during a challenge, show them. Otherwise, keep working silently until done.
 
-## Step 5: Final Output
+## Step 4: Final Output
 
-When the challenge is accepted or stopped:
+This is the ONLY output the user sees. Be concise.
 
 ```
-## ✅ Agreed Resolution
+## ✅ Challenge Complete
 
-**Resolution:** [final paragraph]
-**Composite Confidence:** [N]/10
-**Agent Scores:** [list only active agents and their scores]
-**Rounds completed:** [N]
-**Intensity:** [quick/deep/brutal]
+**Resolution:** [final paragraph — the refined, battle-tested conclusion]
+
+**Confidence:** [N]/10
+**Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
+
+**Key challenges that shaped this resolution:**
+- [icon] [agent]: [one-line challenge summary] → [how it was addressed]
 
 **Surviving open questions:**
-- [list any unresolved nuances]
+- [list any unresolved nuances, or "None" if all resolved]
 
-**Dismissed challenges:**
-- [challenge] — dismissed because [reason]
+**Tensions:**
+- [if any agent disagreements exist, list them. Otherwise omit this section]
 
-**Evidence trail:**
+**Evidence:**
 - [file:line — what was found]
 ```
+
+Use these icons in the key challenges list:
+- 🔴 Critical  🟡 Significant  🔵 Minor
 
 ## Confidence Weighting
 
@@ -178,9 +143,8 @@ Base weight is 1x per agent. Agents most relevant to the topic category get 2x w
 
 ## Important Behaviors
 
-- **Never soften challenges to please** — be genuinely adversarial from each agent's perspective
+- **Never soften challenges** — be genuinely adversarial from each agent's perspective
 - **Always gather evidence** — a challenge without evidence is just an opinion. Use tools.
-- **Track evolution** — note what changed across rounds so the user sees the progression
-- **Acknowledge good rebuttals** — if a challenge is refuted well, say so and explain what convinced you
-- **Maintain agent voice** — when role-playing as sentinel, think like a security engineer. When role-playing as pragmatist, think like someone who ships fast. Don't blend the voices.
-- **If the user's rebuttal is weak, say so** — keep the challenge open and explain why the rebuttal doesn't hold
+- **Maintain agent voice** — when role-playing as sentinel, think like a security engineer. When as pragmatist, think like someone who ships fast. Don't blend voices.
+- **Be concise** — the user wants results, not a play-by-play. Do the work silently, present the conclusion clearly.
+- **Only show what matters** — omit dismissed minor challenges from the final output. Surface only challenges that actually shaped the resolution.
