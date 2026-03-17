@@ -35,9 +35,9 @@ A topic can span multiple categories. Identify the top 1-2 categories.
 
 | Intensity | Rounds | Agents | Select When |
 |-----------|--------|--------|-------------|
-| **Quick** | 1-2 | 1-2 most relevant | Simple factual claims, minor decisions, low-risk changes, single-function scope |
-| **Deep** | 3-5 | 2-3 most relevant | Architecture decisions, complex logic, security-sensitive code, multi-component scope |
-| **Brutal** | 5+ (no max) | All 4 | Production deployments, breaking changes, security-critical paths, infrastructure scope |
+| **Quick** | 1 | 1-2 most relevant | Simple factual claims, minor decisions, low-risk changes, single-function scope |
+| **Deep** | up to 3 | 2-3 most relevant | Architecture decisions, complex logic, security-sensitive code, multi-component scope |
+| **Brutal** | up to 5 | All 4 | Production deployments, breaking changes, security-critical paths, infrastructure scope |
 
 **Escalation signals** (each pushes toward higher intensity):
 - Keywords in topic: "deploy", "production", "breaking change", "security", "auth", "migration"
@@ -82,10 +82,16 @@ Each agent's prompt should include:
 
 **Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results.
 
-**Round 2+:** If the composite confidence is below 8 OR any individual agent scored below 6, synthesize a refined resolution from Round 1 results and dispatch agents again in parallel against the refined version. Repeat until:
+**Round 2+:** If the composite confidence is below 8 OR any individual agent scored below 7, synthesize a refined resolution and re-dispatch. Each agent's prompt in round N MUST include:
+- The refined resolution
+- A summary of ALL challenges raised in rounds 1 through N-1 (who raised what, what was addressed, what was dismissed)
+- Explicit instruction: "Do NOT repeat challenges that were already raised. Find NEW issues, escalate unresolved concerns, or confirm previous challenges were adequately addressed."
 
-1. **Confidence threshold:** Composite score >= 8 AND no individual agent scores below 6
-2. **Max rounds reached:** Based on intensity level (quick: 2, deep: 5, brutal: stop after 8)
+This ensures each round produces genuinely new insights rather than repeating the same findings.
+
+**Stopping conditions** — stop when ANY of these are met:
+1. **Confidence threshold:** Composite score >= 8 AND no individual agent scores below 7
+2. **Max rounds reached:** quick: 1, deep: 3, brutal: 5
 
 ### Tensions
 
