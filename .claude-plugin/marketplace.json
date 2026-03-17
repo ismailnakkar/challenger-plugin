@@ -1,0 +1,13 @@
+{
+  "name": "challenger",
+  "owner": {
+    "name": "ismailnakkar"
+  },
+  "plugins": [
+    {
+      "name": "challenger-plugin",
+      "source": "./",
+      "description": "Multi-agent adversarial arena that stress-tests code, reasoning, and decisions through evidence-backed challenges"
+    }
+  ]
+}
