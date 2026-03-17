@@ -1,0 +1,10 @@
+{
+  "name": "challenger-plugin",
+  "description": "Iteratively challenges findings until a refined, solid resolution is agreed upon",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ismail",
+    "email": "ismail@nakkar.me"
+  },
+  "keywords": ["reasoning", "review", "validation", "adversarial", "quality"]
+}
