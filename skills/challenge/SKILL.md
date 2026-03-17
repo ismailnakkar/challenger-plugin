@@ -73,9 +73,10 @@ For each selected agent, launch a parallel Agent subagent with `subagent_type` m
 Each agent's prompt should include:
 1. The current resolution or topic being challenged
 2. The full conversation context relevant to the challenge
-3. Instructions to challenge the resolution from their specific lens
-4. Instructions to gather evidence using tools (Read, Grep, Glob, Bash)
-5. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and confidence score (1-10)
+3. The current working directory so agents know where to look for code
+4. Instructions to challenge the resolution from their specific lens
+5. Instructions to gather evidence using tools (Read, Grep, Glob, Bash) in the current codebase
+6. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and confidence score (1-10)
 
 ### Multi-Round Flow
 

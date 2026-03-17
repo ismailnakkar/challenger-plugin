@@ -8,9 +8,9 @@ When you invoke `/challenge`, the plugin:
 
 1. **Classifies** what you're challenging (security, architecture, cost/complexity, or general reasoning)
 2. **Auto-scales** intensity based on stakes — quick sanity check, deep review, or brutal stress test
-3. **Assembles** the right panel of challenger agents for the topic
-4. **Runs rounds** where each agent challenges the resolution from their unique angle, gathering real evidence from your codebase
-5. **Refines** the resolution until it reaches high confidence or you accept it
+3. **Dispatches parallel agents** — real subagents running simultaneously, each with isolated context and independent perspectives
+4. **Runs multi-round refinement** silently — agents challenge, evidence is gathered, resolution is refined
+5. **Delivers one concise result** — the battle-tested resolution with key challenges, evidence, and confidence score
 
 ## Agents
 
@@ -82,17 +82,27 @@ Category: Security
 Intensity: Deep — security-sensitive authentication decision
 Agents: skeptic, sentinel, architect
 
-## Round 1 — Skeptic challenges: JWT authentication
-...
-## Round 1 — Sentinel challenges: JWT authentication
-...
-## Round 1 — Architect challenges: JWT authentication
-...
+[agents dispatched in parallel, running silently...]
 
-Round 1 Complete
-Composite Confidence: 6/10
+## ✅ Challenge Complete
 
-> Accept this resolution, or shall I keep challenging?
+Resolution: Use JWT tokens with short-lived access tokens (15min),
+HTTP-only refresh tokens, and server-side revocation via a token
+blocklist. Store secrets in environment variables, not code.
+
+Confidence: 8/10
+Rounds: 2 | Intensity: Deep | Agents: skeptic, sentinel, architect
+
+Key challenges that shaped this resolution:
+- 🔴 sentinel: JWT in localStorage is XSS-vulnerable → moved to HTTP-only cookies
+- 🟡 skeptic: No revocation strategy for compromised tokens → added token blocklist
+- 🔵 architect: Refresh token rotation missing → added rotation on each refresh
+
+Surviving open questions:
+- Token blocklist storage strategy (Redis vs DB) not yet decided
+
+Evidence:
+- src/auth/middleware.ts:42 — current token validation has no expiry check
 ```
 
 ## Project Structure
