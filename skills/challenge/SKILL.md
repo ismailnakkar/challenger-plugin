@@ -80,18 +80,20 @@ Each agent's prompt should include:
 
 ### Multi-Round Flow
 
-**Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results.
+**Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results. Compute composite confidence.
 
-**Round 2+:** If the composite confidence is below 8 OR any individual agent scored below 7, synthesize a refined resolution and re-dispatch. Each agent's prompt in round N MUST include:
-- The refined resolution
+**After each round, check:** Is composite confidence >= 8 AND every individual agent score >= 7?
+- **YES → Stop.** Proceed to final output.
+- **NO → You MUST run another round.** Do NOT stop early. Do NOT skip to final output. Synthesize a refined resolution incorporating all valid challenges, then re-dispatch.
+
+**This is critical: if confidence is below 8, you are REQUIRED to continue. A brutal challenge at 5.8/10 after round 1 means rounds 2-5 must still happen.**
+
+**Round 2+ agent prompts MUST include:**
+- The refined resolution (updated to address valid challenges from prior rounds)
 - A summary of ALL challenges raised in rounds 1 through N-1 (who raised what, what was addressed, what was dismissed)
 - Explicit instruction: "Do NOT repeat challenges that were already raised. Find NEW issues, escalate unresolved concerns, or confirm previous challenges were adequately addressed."
 
-This ensures each round produces genuinely new insights rather than repeating the same findings.
-
-**Stopping conditions** — stop when ANY of these are met:
-1. **Confidence threshold:** Composite score >= 8 AND no individual agent scores below 7
-2. **Max rounds reached:** quick: 1, deep: 3, brutal: 5
+**Hard stop (max rounds):** quick: 1, deep: 3, brutal: 5. Only stop before the max if confidence threshold is met.
 
 ### Tensions
 
