@@ -37,7 +37,7 @@ A topic can span multiple categories. Identify the top 1-2 categories.
 |-----------|--------|--------|-------------|
 | **Quick** | 1 | 1-2 most relevant | Simple factual claims, minor decisions, low-risk changes, single-function scope |
 | **Deep** | up to 3 | 2-3 most relevant | Architecture decisions, complex logic, security-sensitive code, multi-component scope |
-| **Brutal** | up to 5 | All 4 | Production deployments, breaking changes, security-critical paths, infrastructure scope |
+| **Brutal** | no cap | All 4 | Production deployments, breaking changes, security-critical paths, infrastructure scope |
 
 **Escalation signals** (each pushes toward higher intensity):
 - Keywords in topic: "deploy", "production", "breaking change", "security", "auth", "migration"
@@ -93,7 +93,7 @@ Each agent's prompt should include:
 - A summary of ALL challenges raised in rounds 1 through N-1 (who raised what, what was addressed, what was dismissed)
 - Explicit instruction: "Do NOT repeat challenges that were already raised. Find NEW issues, escalate unresolved concerns, or confirm previous challenges were adequately addressed."
 
-**Hard stop (max rounds):** quick: 1, deep: 3, brutal: 5. Only stop before the max if confidence threshold is met.
+**Hard stop (max rounds):** quick: 1, deep: 3, brutal: no cap (runs until confidence threshold is met). If brutal exceeds 8 rounds, warn the user and ask whether to continue or stop.
 
 ### Tensions
 
