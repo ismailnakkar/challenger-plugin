@@ -111,11 +111,13 @@ After all active agents have taken their turn in a round, compute the composite 
 ```
 **Round [N] Complete**
 Composite Confidence: [N]/10
-Agent Scores: skeptic [N], sentinel [N], architect [N], pragmatist [N]
+Agent Scores: [list only active agents and their scores]
 [note any tensions between agents]
 
 > Accept this resolution, or shall I keep challenging?
 ```
+
+Only show scores for agents that participated in this round. If only skeptic and sentinel are active, do not list architect or pragmatist.
 
 ### Tensions
 
@@ -146,7 +148,7 @@ When the challenge is accepted or stopped:
 
 **Resolution:** [final paragraph]
 **Composite Confidence:** [N]/10
-**Agent Scores:** skeptic [N], sentinel [N], architect [N], pragmatist [N]
+**Agent Scores:** [list only active agents and their scores]
 **Rounds completed:** [N]
 **Intensity:** [quick/deep/brutal]
 
