@@ -62,42 +62,37 @@ Intensity: [quick/deep/brutal] — [reason]
 Agents: [list of active agents]
 ```
 
-## Step 3: Run Challenge Rounds
+## Step 3: Dispatch Parallel Agents
 
-Run all rounds internally without showing per-round output. Do NOT print each agent's turn or between-round summaries. Work through all rounds silently, refining the resolution as you go.
+Dispatch all selected agents **simultaneously** using the Agent tool. Each agent runs independently in parallel, examining the resolution from its own lens.
 
-For each round, cycle through the active agents in order: **skeptic → sentinel → architect → pragmatist** (skip any not selected).
+### Per-Agent Dispatch
 
-### Per-Agent Turn (internal, not shown to user)
+For each selected agent, launch a parallel Agent subagent with `subagent_type` matching the agent name (e.g., `challenger-plugin:skeptic`, `challenger-plugin:sentinel`, etc.). Send all agent calls in a **single message** so they run concurrently.
 
-For each agent's turn, adopt that agent's personality and lens (as defined in their agent .md file). Then:
+Each agent's prompt should include:
+1. The current resolution or topic being challenged
+2. The full conversation context relevant to the challenge
+3. Instructions to challenge the resolution from their specific lens
+4. Instructions to gather evidence using tools (Read, Grep, Glob, Bash)
+5. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and confidence score (1-10)
 
-1. **State** the current resolution
-2. **Challenge** it with one focused objection through your agent's specific lens
-3. **Gather evidence** — use Read, Grep, Glob, or Bash to verify or support your challenge
-4. **Assess impact** — what happens if this challenge is ignored?
-5. **Refine** — update the resolution to address valid challenges, or dismiss with reason
-6. **Score** confidence 1-10 from this agent's perspective
+### Multi-Round Flow
 
-Track all challenges, evidence, refinements, and scores internally for the final output.
+**Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results.
 
-Use these severity levels internally:
-- Critical — this could make the resolution completely wrong or cause serious harm
-- Significant — this weakens the resolution or creates risk
-- Minor — a gap worth noting but not blocking
-
-### Tensions (tracked internally)
-
-If two agents' challenges contradict each other (e.g., architect wants more abstraction, pragmatist wants less), record this as a tension to surface in the final output.
-
-### Stopping Conditions
-
-Stop the challenge loop when ANY of these are met:
+**Round 2+:** If the composite confidence is below 8 OR any individual agent scored below 6, synthesize a refined resolution from Round 1 results and dispatch agents again in parallel against the refined version. Repeat until:
 
 1. **Confidence threshold:** Composite score >= 8 AND no individual agent scores below 6
-2. **Max rounds reached:** Based on intensity level (quick: 2, deep: 5, brutal: no hard max — but stop after 8 rounds)
+2. **Max rounds reached:** Based on intensity level (quick: 2, deep: 5, brutal: stop after 8)
 
-If the user asks to see round details during a challenge, show them. Otherwise, keep working silently until done.
+### Tensions
+
+If two agents return contradicting challenges (e.g., architect wants more abstraction, pragmatist wants less), record this as a tension for the final output.
+
+### Between Rounds
+
+Do NOT show per-round output to the user. Synthesize and re-dispatch silently. Only show the final consolidated result.
 
 ## Step 4: Final Output
 
@@ -143,8 +138,8 @@ Base weight is 1x per agent. Agents most relevant to the topic category get 2x w
 
 ## Important Behaviors
 
+- **Always dispatch agents in parallel** — use a single message with multiple Agent tool calls so they run concurrently. Never run agents sequentially.
 - **Never soften challenges** — be genuinely adversarial from each agent's perspective
-- **Always gather evidence** — a challenge without evidence is just an opinion. Use tools.
-- **Maintain agent voice** — when role-playing as sentinel, think like a security engineer. When as pragmatist, think like someone who ships fast. Don't blend voices.
+- **Always gather evidence** — a challenge without evidence is just an opinion. Agents must use tools.
 - **Be concise** — the user wants results, not a play-by-play. Do the work silently, present the conclusion clearly.
 - **Only show what matters** — omit dismissed minor challenges from the final output. Surface only challenges that actually shaped the resolution.
