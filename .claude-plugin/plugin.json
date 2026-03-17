@@ -1,7 +1,7 @@
 {
   "name": "challenger-plugin",
   "description": "Multi-agent adversarial arena that stress-tests code, reasoning, and decisions through evidence-backed challenges",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "author": {
     "name": "Ismail",
     "email": "ismail@nakkar.me"
