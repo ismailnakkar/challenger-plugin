@@ -1,10 +1,10 @@
 {
   "name": "challenger-plugin",
-  "description": "Iteratively challenges findings until a refined, solid resolution is agreed upon",
-  "version": "1.0.0",
+  "description": "Multi-agent adversarial arena that stress-tests code, reasoning, and decisions through evidence-backed challenges",
+  "version": "2.0.0",
   "author": {
     "name": "Ismail",
     "email": "ismail@nakkar.me"
   },
-  "keywords": ["reasoning", "review", "validation", "adversarial", "quality"]
+  "keywords": ["reasoning", "review", "validation", "adversarial", "quality", "security", "architecture", "multi-agent"]
 }
