@@ -16,7 +16,7 @@ Do not proceed further.
 
 ## Generate Report
 
-If a challenge session exists, extract the following from the conversation and write a markdown report:
+If a challenge session exists, extract the following from the full conversation context — including the orchestrator's internal agent dispatch prompts and results, not just the final visible output — and write a markdown report:
 
 ### Report Template
 

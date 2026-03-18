@@ -41,9 +41,9 @@ The main skill. Runs adversarial challenge rounds against a resolution.
 
 | Level | Rounds | Agents | When |
 |-------|--------|--------|------|
-| Quick | 1-2 | 1-2 | Minor decisions, simple claims |
-| Deep | 3-5 | 2-3 | Architecture decisions, security-sensitive code |
-| Brutal | 5+ | All 4 | Production deploys, breaking changes, critical paths |
+| Quick | 1 | 1-2 | Minor decisions, simple claims |
+| Deep | up to 3 | 2-3 | Architecture decisions, security-sensitive code |
+| Brutal | no cap | All 4 | Production deploys, breaking changes, critical paths |
 
 ### `/challenge-report`
 

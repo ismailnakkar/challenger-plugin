@@ -97,7 +97,9 @@ Each agent's prompt should include:
 - A summary of ALL challenges raised in rounds 1 through N-1 (who raised what, what was addressed, what was dismissed)
 - Explicit instruction: "Do NOT repeat challenges that were already raised. Find NEW issues, escalate unresolved concerns, or confirm previous challenges were adequately addressed."
 
-**Hard stop (max rounds):** quick: 1, deep: 3, brutal: no cap (runs until confidence threshold is met). If brutal exceeds 8 rounds, warn the user and ask whether to continue or stop.
+**Hard stop (max rounds):** quick: 1, deep: 3, brutal: no cap (runs until confidence threshold is met).
+
+**Stall detection (brutal only):** If the composite confidence has not increased by at least 0.5 points for 2 consecutive rounds, the challenge is stalling — stop and present results with current confidence. Do not keep iterating if rounds are not producing progress. Also warn the user after 8 rounds and ask whether to continue or stop.
 
 ### Tensions
 
@@ -137,19 +139,16 @@ Use these icons in the key challenges list:
 
 ## Confidence Weighting
 
-Confidence scores are computed as weighted averages. Base weight is 1x per agent. Agents most relevant to the topic category get 2x weight.
+Compute a weighted composite score. The agent most relevant to the topic category matters more:
 
-| Topic Category | 2x Weight Agents | 1x Weight Agents |
-|---------------|-----------------|-----------------|
-| Security | sentinel | skeptic, architect, pragmatist |
-| Architecture | architect | skeptic, sentinel, pragmatist |
-| Cost/Complexity | pragmatist | skeptic, sentinel, architect |
-| General/Reasoning | (all equal 1x) | — |
-| Multi-category | up to 2 agents at 2x | remaining at 1x |
+- **Security topic** → sentinel's score counts most
+- **Architecture topic** → architect's score counts most
+- **Cost/complexity topic** → pragmatist's score counts most
+- **General/reasoning** → all agents weighted equally
 
-**Formula:** composite = sum(agent_score * weight) / sum(weights)
+When averaging scores, give the most relevant agent roughly double the influence of the others. Do not compute an exact formula — estimate the weighted average.
 
-Agents should qualitatively note their certainty level in their challenge text (e.g., "verified in code" vs "suspected pattern") rather than as a separate numeric score.
+Note: The numeric confidence score rates the **resolution's solidity after fixes**. Separately, agents should qualitatively note their **finding certainty** in their challenge text (e.g., "confirmed unhandled after tracing callers" vs "suspected based on local pattern"). These are different concepts — do not conflate them.
 
 ## Important Behaviors
 
