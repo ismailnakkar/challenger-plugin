@@ -184,7 +184,21 @@ After collecting verification results, present the final report. This is the def
 - [list, or "None"]
 ```
 
-If the **Verified** score is significantly lower than **Predicted** (2+ points), note why — which fixes didn't work as expected or introduced regressions.
+**If the Verified score is lower than Predicted by 2+ points**, the fixes didn't land as expected. Present options to the user:
+
+```
+⚠️ Verification gap: Predicted [N]/10 but verified at [N]/10.
+
+Issues:
+- [what went wrong — failed fix, regression, new issue]
+
+Options:
+1. Fix the remaining issues (another fix + verify cycle)
+2. Revert the problematic fixes and keep the rest
+3. Accept current state and move on
+```
+
+Wait for the user to choose before proceeding. If they choose option 1, repeat Steps 5-7 for the remaining issues only. If they choose option 2, revert the specified fixes and re-verify. If they choose option 3, finalize the report as-is.
 
 ## Confidence Weighting
 
