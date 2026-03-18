@@ -77,14 +77,16 @@ Each agent's prompt should include:
 4. Instructions to challenge the resolution from their specific lens
 5. Instructions to gather evidence using tools (Read, Grep, Glob, Bash) in the current codebase
 6. Instructions to **verify findings before reporting them** — before raising an issue, the agent MUST trace the full code path to confirm it's a real problem. Check: Is this handled elsewhere? Is there middleware, a base class, a try/catch, or a caller that already addresses this? Is this pattern intentional (check comments, git blame, related tests)? An issue that looks like a bug in one file but is handled three files up the call chain is not a finding — it's a false positive. Only report issues you've confirmed are genuinely unhandled.
-7. Instructions to return: their challenge, evidence found (with qualitative indication of how they verified it — "confirmed unhandled after tracing callers" vs "suspected based on local pattern"), severity (Critical/Significant/Minor), refined resolution, and a **confidence score (1-10):** If the suggested fixes are implemented, how solid would the resolution be? (10 = bulletproof, 1 = still fundamentally broken)
+7. Instructions to return: their challenge, evidence found (with qualitative indication of how they verified it — "confirmed unhandled after tracing callers" vs "suspected based on local pattern"), severity (Critical/Significant/Minor), refined resolution, and TWO scores:
+   - **Current State (1-10):** How solid is the code/decision right now, as-is? (10 = no issues found, 1 = critically broken)
+   - **After Fixes (1-10):** How solid would it be after implementing the suggested fixes? (10 = bulletproof, 1 = still fundamentally broken)
 8. Instructions to **assess blast radius of suggested fixes** — before scoring confidence, the agent MUST check: what other code depends on the code being changed? Could this fix break callers, tests, integrations, or assumptions elsewhere? The confidence score should reflect the full impact of the fix, not just the fix in isolation. If the agent cannot verify blast radius, it must say so and lower its score accordingly.
 
 ### Multi-Round Flow
 
 **Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results. Compute composite confidence.
 
-**After each round, check:** Is composite confidence >= 8 AND every individual agent score >= 7?
+**After each round, check:** Is composite **After Fixes** score >= 8 AND every individual agent's After Fixes score >= 7?
 - **YES → Stop.** Proceed to final output.
 - **NO → You MUST run another round.** Do NOT stop early. Do NOT skip to final output. Synthesize a refined resolution incorporating all valid challenges, then re-dispatch.
 
@@ -118,7 +120,8 @@ This is the ONLY output the user sees. Be concise.
 
 **Resolution:** [final paragraph — the refined, battle-tested conclusion]
 
-**Confidence:** [N]/10 — how solid this will be after implementing the suggested fixes
+**Current State:** [N]/10 — how solid the code/decision is RIGHT NOW, before any fixes
+**After Fixes:** [N]/10 — how solid it will be after implementing the suggested fixes
 **Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
 
 **Key challenges that shaped this resolution:**
@@ -148,7 +151,9 @@ Compute a weighted composite score. The agent most relevant to the topic categor
 
 When averaging scores, give the most relevant agent roughly double the influence of the others. Do not compute an exact formula — estimate the weighted average.
 
-Note: The numeric confidence score rates the **resolution's solidity after fixes**. Separately, agents should qualitatively note their **finding certainty** in their challenge text (e.g., "confirmed unhandled after tracing callers" vs "suspected based on local pattern"). These are different concepts — do not conflate them.
+**Weighting applies to the After Fixes score** for stopping decisions. The Current State score is informational only — it tells the user how things stand right now.
+
+Agents should qualitatively note their **finding certainty** in their challenge text (e.g., "confirmed unhandled after tracing callers" vs "suspected based on local pattern").
 
 ## Important Behaviors
 
