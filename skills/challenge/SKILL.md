@@ -76,13 +76,15 @@ Each agent's prompt should include:
 3. The current working directory so agents know where to look for code
 4. Instructions to challenge the resolution from their specific lens
 5. Instructions to gather evidence using tools (Read, Grep, Glob, Bash) in the current codebase
-6. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and confidence score (1-10)
+6. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and TWO confidence scores:
+   - **Finding confidence (1-10):** How certain is the agent that the issues it found are real? (10 = verified with evidence, 1 = speculative)
+   - **Post-fix confidence (1-10):** If the suggested fixes are implemented, how solid would the resolution be? (10 = bulletproof, 1 = still fundamentally broken)
 
 ### Multi-Round Flow
 
 **Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results. Compute composite confidence.
 
-**After each round, check:** Is composite confidence >= 8 AND every individual agent score >= 7?
+**After each round, check:** Is composite **post-fix** confidence >= 8 AND every individual agent's post-fix score >= 7?
 - **YES → Stop.** Proceed to final output.
 - **NO → You MUST run another round.** Do NOT stop early. Do NOT skip to final output. Synthesize a refined resolution incorporating all valid challenges, then re-dispatch.
 
@@ -112,7 +114,8 @@ This is the ONLY output the user sees. Be concise.
 
 **Resolution:** [final paragraph — the refined, battle-tested conclusion]
 
-**Confidence:** [N]/10
+**Finding Confidence:** [N]/10 — how certain we are that the issues found are real
+**Post-Fix Confidence:** [N]/10 — how solid this will be after implementing the fixes
 **Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
 
 **Key challenges that shaped this resolution:**
@@ -133,7 +136,7 @@ Use these icons in the key challenges list:
 
 ## Confidence Weighting
 
-Base weight is 1x per agent. Agents most relevant to the topic category get 2x weight.
+Both confidence scores (finding and post-fix) are computed as weighted averages. Base weight is 1x per agent. Agents most relevant to the topic category get 2x weight.
 
 | Topic Category | 2x Weight Agents | 1x Weight Agents |
 |---------------|-----------------|-----------------|
@@ -143,7 +146,9 @@ Base weight is 1x per agent. Agents most relevant to the topic category get 2x w
 | General/Reasoning | (all equal 1x) | — |
 | Multi-category | up to 2 agents at 2x | remaining at 1x |
 
-**Formula:** composite = sum(agent_score * weight) / sum(weights)
+**Formula (applied to both scores):** composite = sum(agent_score * weight) / sum(weights)
+
+**Multi-round stopping uses post-fix confidence** — because we want to keep challenging until the resolution will be solid after fixes, not until we're sure the findings are real.
 
 ## Important Behaviors
 
