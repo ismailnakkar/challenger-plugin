@@ -77,6 +77,7 @@ Each agent's prompt should include:
 4. Instructions to challenge the resolution from their specific lens
 5. Instructions to gather evidence using tools (Read, Grep, Glob, Bash) in the current codebase
 6. Instructions to return: their challenge, evidence found (with qualitative indication of how they verified it — "confirmed in code" vs "suspected based on pattern"), severity (Critical/Significant/Minor), refined resolution, and a **confidence score (1-10):** If the suggested fixes are implemented, how solid would the resolution be? (10 = bulletproof, 1 = still fundamentally broken)
+7. Instructions to **assess blast radius of suggested fixes** — before scoring confidence, the agent MUST check: what other code depends on the code being changed? Could this fix break callers, tests, integrations, or assumptions elsewhere? The confidence score should reflect the full impact of the fix, not just the fix in isolation. If the agent cannot verify blast radius, it must say so and lower its score accordingly.
 
 ### Multi-Round Flow
 
