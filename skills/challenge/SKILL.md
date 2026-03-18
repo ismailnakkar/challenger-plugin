@@ -76,19 +76,19 @@ Each agent's prompt should include:
 3. The current working directory so agents know where to look for code
 4. Instructions to challenge the resolution from their specific lens
 5. Instructions to gather evidence using tools (Read, Grep, Glob, Bash) in the current codebase
-6. Instructions to return: their challenge, evidence found, severity (Critical/Significant/Minor), refined resolution, and TWO confidence scores:
-   - **Finding confidence (1-10):** How certain is the agent that the issues it found are real? (10 = verified with evidence, 1 = speculative)
-   - **Post-fix confidence (1-10):** If the suggested fixes are implemented, how solid would the resolution be? (10 = bulletproof, 1 = still fundamentally broken)
+6. Instructions to return: their challenge, evidence found (with qualitative indication of how they verified it — "confirmed in code" vs "suspected based on pattern"), severity (Critical/Significant/Minor), refined resolution, and a **confidence score (1-10):** If the suggested fixes are implemented, how solid would the resolution be? (10 = bulletproof, 1 = still fundamentally broken)
 
 ### Multi-Round Flow
 
 **Round 1:** Dispatch all selected agents in parallel against the original resolution. Collect their results. Compute composite confidence.
 
-**After each round, check:** Is composite **post-fix** confidence >= 8 AND every individual agent's post-fix score >= 7?
+**After each round, check:** Is composite confidence >= 8 AND every individual agent score >= 7?
 - **YES → Stop.** Proceed to final output.
 - **NO → You MUST run another round.** Do NOT stop early. Do NOT skip to final output. Synthesize a refined resolution incorporating all valid challenges, then re-dispatch.
 
-**This is critical: if confidence is below 8, you are REQUIRED to continue. A brutal challenge at 5.8/10 after round 1 means rounds 2-5 must still happen.**
+**This is critical: if confidence is below 8, you are REQUIRED to continue. A brutal challenge at 5.8/10 after round 1 means more rounds must happen.**
+
+**Tension-aware stopping:** If the same tension between two agents (e.g., architect vs pragmatist on abstraction level) persists for 2+ consecutive rounds with no meaningful change in their scores (within 1 point), this is an irreconcilable design tradeoff, not a failure to converge. In this case, you MAY stop even if those agents score below 7 — document the tension as an open question requiring human judgment, and compute the composite excluding the deadlocked agents' scores from the threshold check.
 
 **Round 2+ agent prompts MUST include:**
 - The refined resolution (updated to address valid challenges from prior rounds)
@@ -99,7 +99,7 @@ Each agent's prompt should include:
 
 ### Tensions
 
-If two agents return contradicting challenges (e.g., architect wants more abstraction, pragmatist wants less), record this as a tension for the final output.
+If two agents return contradicting challenges (e.g., architect wants more abstraction, pragmatist wants less), record this as a tension. Tensions are not failures — they represent genuine design tradeoffs that require human judgment. See "Tension-aware stopping" above for how persistent tensions affect the stopping condition.
 
 ### Between Rounds
 
@@ -114,8 +114,7 @@ This is the ONLY output the user sees. Be concise.
 
 **Resolution:** [final paragraph — the refined, battle-tested conclusion]
 
-**Finding Confidence:** [N]/10 — how certain we are that the issues found are real
-**Post-Fix Confidence:** [N]/10 — how solid this will be after implementing the fixes
+**Confidence:** [N]/10 — how solid this will be after implementing the suggested fixes
 **Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
 
 **Key challenges that shaped this resolution:**
@@ -136,7 +135,7 @@ Use these icons in the key challenges list:
 
 ## Confidence Weighting
 
-Both confidence scores (finding and post-fix) are computed as weighted averages. Base weight is 1x per agent. Agents most relevant to the topic category get 2x weight.
+Confidence scores are computed as weighted averages. Base weight is 1x per agent. Agents most relevant to the topic category get 2x weight.
 
 | Topic Category | 2x Weight Agents | 1x Weight Agents |
 |---------------|-----------------|-----------------|
@@ -146,9 +145,9 @@ Both confidence scores (finding and post-fix) are computed as weighted averages.
 | General/Reasoning | (all equal 1x) | — |
 | Multi-category | up to 2 agents at 2x | remaining at 1x |
 
-**Formula (applied to both scores):** composite = sum(agent_score * weight) / sum(weights)
+**Formula:** composite = sum(agent_score * weight) / sum(weights)
 
-**Multi-round stopping uses post-fix confidence** — because we want to keep challenging until the resolution will be solid after fixes, not until we're sure the findings are real.
+Agents should qualitatively note their certainty level in their challenge text (e.g., "verified in code" vs "suspected pattern") rather than as a separate numeric score.
 
 ## Important Behaviors
 
