@@ -111,21 +111,21 @@ If two agents return contradicting challenges (e.g., architect wants more abstra
 
 Do NOT show per-round output to the user. Synthesize and re-dispatch silently. Only show the final consolidated result.
 
-## Step 4: Final Output
+## Step 4: Challenge Output
 
-This is the ONLY output the user sees. Be concise.
+Present findings to the user. Be concise.
 
 ```
-## ✅ Challenge Complete
+## Challenge Findings
 
 **Resolution:** [final paragraph — the refined, battle-tested conclusion]
 
 **Current State:** [N]/10 — how solid the code/decision is RIGHT NOW, before any fixes
-**After Fixes:** [N]/10 — how solid it will be after implementing the suggested fixes
+**Predicted After Fixes:** [N]/10 — estimated score after implementing fixes below
 **Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
 
-**Key challenges that shaped this resolution:**
-- [icon] [agent]: [one-line challenge summary] → [how it was addressed]
+**Fixes needed:**
+- [icon] [agent]: [one-line challenge summary] → [suggested fix]
 
 **Surviving open questions:**
 - [list any unresolved nuances, or "None" if all resolved]
@@ -137,8 +137,54 @@ This is the ONLY output the user sees. Be concise.
 - [file:line — what was found]
 ```
 
-Use these icons in the key challenges list:
+Use these icons:
 - 🔴 Critical  🟡 Significant  🔵 Minor
+
+After presenting findings, tell the user: "I'll now implement the fixes and run a verification pass to confirm the score."
+
+## Step 5: Implement Fixes
+
+After the challenge output, implement the suggested fixes. Work through them in priority order (Critical → Significant → Minor). Skip fixes that the user has dismissed or that are marked as open questions/tensions.
+
+Do not ask permission — proceed directly. The user invoked `/challenge` knowing it would find and fix issues.
+
+## Step 6: Verification Pass
+
+After all fixes are implemented, run a **single verification round** by re-dispatching the SAME agents that participated in the challenge, in parallel. Their prompt should include:
+
+1. The original topic and challenge findings
+2. A summary of every fix that was implemented (what changed, which files)
+3. The current working directory
+4. Instructions: "Re-examine the codebase. For each original finding, verify whether the fix actually addresses it. Look for regressions — did any fix introduce new problems? Score the resolution as it stands NOW."
+5. Instructions to return: a **Verified Score (1-10)** for how solid the code/decision is after the actual fixes, plus any new issues found or fixes that were insufficient
+
+Dispatch all verification agents in a single message (parallel).
+
+## Step 7: Final Report
+
+After collecting verification results, present the final report. This is the definitive output.
+
+```
+## ✅ Challenge Complete
+
+**Topic:** [topic]
+**Agents:** [list] | **Intensity:** [quick/deep/brutal] | **Challenge Rounds:** [N]
+
+**Before:** [N]/10
+**Predicted After Fixes:** [N]/10
+**Verified After Fixes:** [N]/10
+
+**Fixes implemented:**
+- [icon] [description] → [status: Fixed / Partially Fixed / Not Fixed]
+
+**Remaining issues:** (if any)
+- [issues the verification pass found unresolved or newly introduced]
+
+**Open questions:**
+- [list, or "None"]
+```
+
+If the **Verified** score is significantly lower than **Predicted** (2+ points), note why — which fixes didn't work as expected or introduced regressions.
 
 ## Confidence Weighting
 
