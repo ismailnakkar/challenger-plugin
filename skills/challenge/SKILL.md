@@ -124,8 +124,16 @@ Present findings to the user. Be concise.
 **Predicted After Fixes:** [N]/10 — estimated score after implementing fixes below
 **Rounds:** [N] | **Intensity:** [quick/deep/brutal] | **Agents:** [list]
 
-**Fixes needed:**
-- [icon] [agent]: [one-line challenge summary] → [suggested fix]
+**Recommended fixes (by priority):**
+
+🔴 **Critical** — should be fixed immediately:
+1. [agent]: [finding] → [suggested fix]
+
+🟡 **Significant** — should be fixed before shipping:
+2. [agent]: [finding] → [suggested fix]
+
+🔵 **Minor** — nice to have:
+3. [agent]: [finding] → [suggested fix]
 
 **Surviving open questions:**
 - [list any unresolved nuances, or "None" if all resolved]
@@ -135,28 +143,26 @@ Present findings to the user. Be concise.
 
 **Evidence:**
 - [file:line — what was found]
+
+Which fixes would you like me to implement? (e.g., "all", "1,2,4", "critical only", "none")
 ```
 
-Use these icons:
-- 🔴 Critical  🟡 Significant  🔵 Minor
+**IMPORTANT: Do NOT implement any fixes automatically. Wait for the user to choose which fixes to apply.** The plugin's job is to find and present — the user decides what gets changed.
 
-After presenting findings, tell the user: "I'll now implement the fixes and run a verification pass to confirm the score."
+## Step 5: Implement Approved Fixes
 
-## Step 5: Implement Fixes
-
-After the challenge output, implement the suggested fixes. Work through them in priority order (Critical → Significant → Minor). Skip fixes that the user has dismissed or that are marked as open questions/tensions.
-
-Do not ask permission — proceed directly. The user invoked `/challenge` knowing it would find and fix issues.
+Only implement fixes the user explicitly approved. Work through them in priority order (Critical → Significant → Minor).
 
 ## Step 6: Verification Pass
 
-After all fixes are implemented, run a **single verification round** by re-dispatching the SAME agents that participated in the challenge, in parallel. Their prompt should include:
+After approved fixes are implemented, run a **single verification round** by re-dispatching the SAME agents that participated in the challenge, in parallel. Their prompt should include:
 
 1. The original topic and challenge findings
-2. A summary of every fix that was implemented (what changed, which files)
-3. The current working directory
-4. Instructions: "Re-examine the codebase. For each original finding, verify whether the fix actually addresses it. Look for regressions — did any fix introduce new problems? Score the resolution as it stands NOW."
-5. Instructions to return: a **Verified Score (1-10)** for how solid the code/decision is after the actual fixes, plus any new issues found or fixes that were insufficient
+2. Which fixes were approved and implemented (and which were skipped by user choice)
+3. A summary of every change made (what changed, which files)
+4. The current working directory
+5. Instructions: "Re-examine the codebase. For each implemented fix, verify it actually addresses the finding. For skipped fixes, note their continued impact. Look for regressions — did any fix introduce new problems? Score the resolution as it stands NOW."
+6. Instructions to return: a **Verified Score (1-10)** for how solid the code/decision is after the actual fixes, plus any new issues found or fixes that were insufficient
 
 Dispatch all verification agents in a single message (parallel).
 
@@ -174,11 +180,14 @@ After collecting verification results, present the final report. This is the def
 **Predicted After Fixes:** [N]/10
 **Verified After Fixes:** [N]/10
 
-**Fixes implemented:**
+**Fixes applied:**
 - [icon] [description] → [status: Fixed / Partially Fixed / Not Fixed]
 
-**Remaining issues:** (if any)
-- [issues the verification pass found unresolved or newly introduced]
+**Fixes skipped (by user choice):**
+- [icon] [description] — impact: [what remains unfixed]
+
+**New issues found during verification:** (if any)
+- [issues the verification pass found newly introduced]
 
 **Open questions:**
 - [list, or "None"]
